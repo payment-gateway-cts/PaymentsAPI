@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PaymentsAPI.BusinessModels\PaymentsAPI.BusinessModels.csproj" />
+    <ProjectReference Include="..\PaymentsAPI.Interfaces\PaymentsAPI.Interfaces.csproj" />
+  </ItemGroup>
+
+</Project>
