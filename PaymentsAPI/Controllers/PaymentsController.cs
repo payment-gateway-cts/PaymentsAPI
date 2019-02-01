@@ -20,35 +20,50 @@ namespace PaymentsAPI.Controllers
             _paymentService = paymentService;
         }
 
+        // GET: api/<controller>
         [HttpGet]
-        public IActionResult GetAllPaymentsList()
+        public IEnumerable<PaymentBM> Get()
         {
-            var payments = _paymentService.GetAllPaymentsList();
-            return Ok(payments);
+            return _paymentService.GetPayments();
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetPaymentById([FromRoute]int id)
+        // POST api/<controller>
+        [HttpPost]
+        public void Post(PaymentBM value)
         {
-            var payment = _paymentService.GetPaymentById(id);
-            if (payment != null)
-                return Ok(payment);
-            else
-                return NotFound();
-        }
+            //ToDo: Clean-up
+            //if(value == null)
+            //{
+            //    value = new PaymentBM
+            //    {
+            //        //payee gets payment from payor
+            //        PayeeAccountNumber = "70872490",
+            //        PayeeCurrency = PaymentEnums.Currency.GBP.ToString(),
 
-        public IActionResult MakePayment(Payment newPayment)
-        {
-            newPayment= _paymentService.MakePayment(newPayment);
-            return Ok(newPayment);
-        }
+            //        //payor pay to payee
+            //        PayorAccountNumber = "35933158286",
+            //        PayorCurrency = PaymentEnums.Currency.INR.ToString(),
 
-        public IActionResult PurgePayments()
-        {
-            _paymentService.PurgePayments();
-            return NoContent();
-        }
+            //        PaymentMethod = PaymentEnums.PaymentMethod.InternateBanking.ToString(),
+            //        Amount = 10000,                    
+            //        PaymentDate = DateTime.Now.ToString(),
+            //        TransactionType = PaymentEnums.TransactionType.Credit.ToString()
+            //    };
+            //}
+            if (value != null)
+            {
+                if (string.IsNullOrEmpty(value.PayeeCurrency)) value.PayeeCurrency = PaymentEnums.Currency.GBP.ToString();
+                if (string.IsNullOrEmpty(value.PayorCurrency)) value.PayorCurrency = PaymentEnums.Currency.INR.ToString();
 
+                value.Amount = value.Amount * _paymentService.GetCurrencyExchangeRates(value.PayorCurrency, value.PayeeCurrency);
+                value.PaymentDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                if (string.IsNullOrEmpty(value.PaymentMethod)) value.PaymentMethod = PaymentEnums.PaymentMethod.InternateBanking.ToString();
+
+
+            }
+            _paymentService.MakePayment(value);
+        }
 
     }
 }

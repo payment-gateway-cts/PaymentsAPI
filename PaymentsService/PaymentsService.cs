@@ -1,50 +1,24 @@
-﻿using PaymentsAPI.BusinessModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using PaymentsAPI.Interfaces;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
-
+using PaymentsAPI.DataModel;
+using PaymentsAPI.DataModel.Entities;
+using PaymentsAPI.BusinessModels;
+using static PaymentsAPI.BusinessModels.PaymentEnums;
 
 namespace PaymentsAPI.Service
 {
     public class PaymentsService : IPaymentsService
     {
-        private PaymentDbContext _dbContext;
+        private readonly PaymentDBContext _context;
 
-        public PaymentsService(PaymentDbContext dbContext)
+        public PaymentsService(PaymentDBContext context)
         {
-            this._dbContext = dbContext;
+            _context = context;
         }
 
-        public IEnumerable<Payment> GetAllPaymentsList()
-        {
-            var payments = _dbContext.Payments.OrderByDescending(pymt => pymt.TransactionDate).ToList();
-            return payments;
-        }
-
-        public Payment MakePayment(Payment newPayment)
-        {
-            _dbContext.Payments.Add(newPayment);
-            _dbContext.SaveChanges();
-            return newPayment; //return with newly generated primary key
-        }
-
-        public Payment GetPaymentById(int transactionId)
-        {
-            return _dbContext.Payments.Find(transactionId);
-        }
-
-        public int PurgePayments() //Used only for deleting junk payments used for testing
-        {
-            var allPayments = _dbContext.Payments.ToArray();
-            for (int i = allPayments.Length - 1; i > -1; i--)
-            {
-                _dbContext.Payments.Remove(allPayments[i]);
-            }
-            return _dbContext.SaveChanges();
-        }
-
+        /* ToDo: Implementation pending for below method
         public IEnumerable<Account> GetAccounts()
         {
             var accs = new List<Account>
@@ -84,6 +58,101 @@ namespace PaymentsAPI.Service
             };
 
             return accs;
+        }*/
+
+        public IEnumerable<PaymentBM> GetPayments()
+        {
+            var payments = (from pay in _context.Payment
+                            join acc in _context.Account on pay.AccountId equals acc.Id
+                            join cus in _context.Customer on pay.CustomerId equals cus.Id
+                            join pm in _context.PaymentMethod on pay.PaymentMethodId equals pm.Id
+                            join sts in _context.PaymentStatus on pay.PaymentStatusId equals sts.Id
+                            select new PaymentBM
+                            {
+                                CustomerName = $" {cus.LastName}, {cus.FirstName}",
+                                PayorAccountNumber = acc.AccountNumber,
+                                //PayeeAccountNumber = ???
+                                TransactionId = pay.TransactionId,
+                                TransactionType = pay.TransactionType,
+                                Amount = pay.PaymentAmount,
+                                PayorCurrency = acc.Currency,
+                                PaymentDate = pay.PaymentDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                                PaymentMethod = pm.PaymentMethodName,
+                                PaymentStatus = sts.Status
+                            }).ToList();
+
+            return payments;
+        }
+
+        public string MakePayment(PaymentBM payment)
+        {
+            Payment newPayment = null;
+
+            //Payment to this account
+            var payeeAccount = _context.Account.Where(x => x.AccountNumber == payment.PayeeAccountNumber).FirstOrDefault();
+
+            //Payment from this account
+            var payorAccount = _context.Account.Where(x => x.AccountNumber == payment.PayorAccountNumber).FirstOrDefault();
+
+            string transactionId = "";
+
+            if (payorAccount != null && payeeAccount != null)
+            {
+
+                var payorCustomerId = _context.Customer.Where(x => x.Account.Any(y => y.Id == payorAccount.Id)).Select(x => x.Id).FirstOrDefault();
+
+                var paymentMethodId = _context.PaymentMethod.Where(x => x.PaymentMethodName == payment.PaymentMethod).Select(x => x.Id).FirstOrDefault();
+                var statusId = _context.PaymentStatus.Where(x => x.Status == PaymentSatus.Completed.ToString()).Select(x => x.Id).FirstOrDefault();
+
+                transactionId = PaymentHelper.GenerateTransactionId();
+
+                if (_context.Payment.Any(x => x.TransactionId == transactionId))
+                {
+                    transactionId = PaymentHelper.GenerateTransactionId();
+                }
+
+
+                payeeAccount.CurrentBalance = payment.TransactionType == TransactionType.Credit.ToString()
+                                                ? payeeAccount.CurrentBalance + payment.Amount
+                                                : payeeAccount.CurrentBalance - payment.Amount;
+
+                payorAccount.CurrentBalance = payment.TransactionType == TransactionType.Credit.ToString()
+                                                ? payorAccount.CurrentBalance - payment.Amount
+                                                : payorAccount.CurrentBalance + payment.Amount;
+
+                newPayment = new Payment
+                {
+                    AccountId = payorAccount.Id,
+                    CustomerId = payorCustomerId,
+                    PaymentMethodId = paymentMethodId,
+                    PaymentStatusId = statusId,
+                    PaymentAmount = payment.Amount,
+                    TransactionId = transactionId,
+                    PaymentDate = payment.PaymentDate.IsDate() ? Convert.ToDateTime(payment.PaymentDate) : DateTime.Now,
+                    TransactionType = payment.TransactionType,
+                    Remarks = $"Amount {payment.Amount.ToString()} has been {payment.TransactionType}ed to account {payment.PayeeAccountNumber}. The current balance is {payeeAccount.CurrentBalance} in Payee account {payment.PayeeAccountNumber}. The current balance is {payorAccount.CurrentBalance} in Payor account {payment.PayeeAccountNumber}."
+                };
+                _context.Payment.Add(newPayment);
+
+                _context.SaveChanges();
+            }
+
+            return newPayment != null && newPayment.Id != null ? transactionId : string.Empty;
+        }
+
+        public string GetCurrency(string accountNumber)
+        {
+            return _context.Account.Where(x => x.AccountNumber == accountNumber).Select(x => x.Currency).FirstOrDefault();
+        }
+
+        public decimal GetCurrencyExchangeRates(string fromCurrency, string toCurrency)
+        {
+            var currencyRatesTable = _context.CurrencyExchangeRates.ToList();
+
+            var fromCurrRates = currencyRatesTable.Where(x => x.CurrencyCode == fromCurrency).Select(x => x.ExchangeRate).FirstOrDefault();
+            var toCurrRates = currencyRatesTable.Where(x => x.CurrencyCode == toCurrency).Select(x => x.ExchangeRate).FirstOrDefault();
+
+            return (toCurrRates / fromCurrRates);
         }
     }
 }

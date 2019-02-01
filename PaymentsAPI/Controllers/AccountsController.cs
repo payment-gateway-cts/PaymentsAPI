@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PaymentsAPI.Interfaces;
-using PaymentsAPI.Models;
 
 namespace PaymentsAPI.Controllers
 {
@@ -23,7 +22,8 @@ namespace PaymentsAPI.Controllers
         [HttpGet]
         public JsonResult Get()
         {
-            return new JsonResult(_paymentService.GetAccounts());
+            //return new JsonResult(_paymentService.GetAccounts());
+            return new JsonResult("To Do");
         }
 
         // GET api/accounts/5

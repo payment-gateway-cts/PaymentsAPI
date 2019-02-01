@@ -2,7 +2,7 @@
 
 namespace PaymentsAPI.BusinessModels
 {
-    public class Account
+    public class AccountBM
     {
         public string Id { get; set; }
         public string IBAN { get; set; }

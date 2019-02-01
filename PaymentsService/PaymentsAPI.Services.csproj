@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PaymentsAPI.BusinessModels\PaymentsAPI.BusinessModels.csproj" />
+    <ProjectReference Include="..\PaymentsAPI.DataModel\PaymentsAPI.DataModel.csproj" />
     <ProjectReference Include="..\PaymentsAPI.Interfaces\PaymentsAPI.Interfaces.csproj" />
   </ItemGroup>
 

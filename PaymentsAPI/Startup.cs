@@ -10,11 +10,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PaymentsAPI.DataModel;
 using PaymentsAPI.Service;
 using PaymentsAPI.Interfaces;
 using Swashbuckle.AspNetCore.Swagger;
-using PaymentsAPI.BusinessModels;
-using PaymentsAPI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace PaymentsAPI
@@ -36,7 +35,7 @@ namespace PaymentsAPI
 
             //Add entity framework context
             var connectionString = Configuration["connectionStrings:dbConnectionString"];
-            services.AddDbContext<PaymentDbContext>(optionBuilder => optionBuilder.UseSqlServer(connectionString));
+            services.AddDbContext<PaymentDBContext>(optionBuilder => optionBuilder.UseSqlServer(connectionString));
 
             //DI setup of Services
             services.AddScoped<IPaymentsService, PaymentsService>();
@@ -50,17 +49,16 @@ namespace PaymentsAPI
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, PaymentDbContext dbContext)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                dbContext.EnsureSeedDataForContext();
             }
             else
             {
                 app.UseExceptionHandler();
-                //app.UseHsts();    //Commenting temp during dev
+                //app.UseHsts();    //Commenting temp during dev for use on docker container
             }
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
@@ -73,7 +71,7 @@ namespace PaymentsAPI
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Payments API V1");
             });
 
-            //app.UseHttpsRedirection();  //Commenting temp during dev
+            //app.UseHttpsRedirection();  //Commenting temp during dev for use on docker container
             app.UseStatusCodePages();
             app.UseMvc();
         }
