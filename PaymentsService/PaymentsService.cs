@@ -6,16 +6,20 @@ using PaymentsAPI.DataModel;
 using PaymentsAPI.DataModel.Entities;
 using PaymentsAPI.BusinessModels;
 using static PaymentsAPI.BusinessModels.PaymentEnums;
-
+using Microsoft.Extensions.Caching.Distributed;
+using Newtonsoft.Json;
+    
 namespace PaymentsAPI.Service
 {
     public class PaymentsService : IPaymentsService
     {
         private readonly PaymentDBContext _context;
+        private IDistributedCache _cache;
 
-        public PaymentsService(PaymentDBContext context)
+        public PaymentsService(PaymentDBContext context, IDistributedCache cache)
         {
             _context = context;
+            _cache = cache;
         }
 
         /* ToDo: Implementation pending for below method
@@ -147,12 +151,48 @@ namespace PaymentsAPI.Service
 
         public decimal GetCurrencyExchangeRates(string fromCurrency, string toCurrency)
         {
-            var currencyRatesTable = _context.CurrencyExchangeRates.ToList();
+            try
+            {
 
-            var fromCurrRates = currencyRatesTable.Where(x => x.CurrencyCode == fromCurrency).Select(x => x.ExchangeRate).FirstOrDefault();
-            var toCurrRates = currencyRatesTable.Where(x => x.CurrencyCode == toCurrency).Select(x => x.ExchangeRate).FirstOrDefault();
+                List<CurrencyExchangeRates> currencyRates;
 
-            return (toCurrRates / fromCurrRates);
+                //Retrieve currency rates from cache
+                var currencyRatesCahed = _cache.GetString("ccyRates");
+
+                if (!string.IsNullOrEmpty(currencyRatesCahed))
+                {
+                    currencyRates = JsonConvert.DeserializeObject<List<CurrencyExchangeRates>>(currencyRatesCahed);
+                }
+                else
+                {
+                    currencyRates = _context.CurrencyExchangeRates.ToList();
+
+                    //Cache Invalidation policy.. expires every 5 mins
+                    DistributedCacheEntryOptions options = new DistributedCacheEntryOptions();
+                    options.SetAbsoluteExpiration(new TimeSpan(0, 5, 0));
+
+                    //Set the cache with latest values;
+                    _cache.SetString("ccyRates", JsonConvert.SerializeObject(currencyRates));
+
+                }
+
+                var fromCurrRates = currencyRates.Where(x => x.CurrencyCode == fromCurrency).Select(x => x.ExchangeRate).FirstOrDefault();
+                var toCurrRates = currencyRates.Where(x => x.CurrencyCode == toCurrency).Select(x => x.ExchangeRate).FirstOrDefault();
+
+                return (toCurrRates / fromCurrRates);
+
+                /*
+                var currencyRatesTable = _context.CurrencyExchangeRates.ToList();
+                var fromCurrRates = currencyRatesTable.Where(x => x.CurrencyCode == fromCurrency).Select(x => x.ExchangeRate).FirstOrDefault();
+                var toCurrRates = currencyRatesTable.Where(x => x.CurrencyCode == toCurrency).Select(x => x.ExchangeRate).FirstOrDefault();
+                return (toCurrRates / fromCurrRates);
+                */
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

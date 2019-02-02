@@ -46,6 +46,12 @@ namespace PaymentsAPI
                 c.SwaggerDoc("v1", new Info { Title = "PaymentsAPI", Version = "v1" });
             });
 
+            //Register RedisCache
+            services.AddDistributedRedisCache(option => {
+                option.Configuration = Configuration.GetConnectionString("RedisConnection");
+                option.InstanceName = "master";
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
