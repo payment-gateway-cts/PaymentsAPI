@@ -67,19 +67,21 @@ namespace PaymentsAPI.Service
         public IEnumerable<PaymentBM> GetPayments()
         {
             var payments = (from pay in _context.Payment
-                            join acc in _context.Account on pay.AccountId equals acc.Id
-                            join cus in _context.Customer on pay.CustomerId equals cus.Id
+                            join payoracc in _context.Account on pay.PayorAccountId equals payoracc.Id
+                            join payorcus in _context.Customer on pay.PayorCustomerId equals payorcus.Id
+                            join payeeacc in _context.Account on pay.PayorAccountId equals payeeacc.Id
+                            join payeecus in _context.Customer on pay.PayorCustomerId equals payeecus.Id
                             join pm in _context.PaymentMethod on pay.PaymentMethodId equals pm.Id
                             join sts in _context.PaymentStatus on pay.PaymentStatusId equals sts.Id
                             select new PaymentBM
                             {
-                                CustomerName = $" {cus.LastName}, {cus.FirstName}",
-                                PayorAccountNumber = acc.AccountNumber,
-                                //PayeeAccountNumber = ???
+                                CustomerName = $" {payeecus.LastName}, {payeecus.FirstName}",
+                                PayorAccountNumber = payoracc.AccountNumber,
+                                PayeeAccountNumber = payeeacc.AccountNumber,
                                 TransactionId = pay.TransactionId,
                                 TransactionType = pay.TransactionType,
                                 Amount = pay.PaymentAmount,
-                                PayorCurrency = acc.Currency,
+                                PayorCurrency = payoracc.Currency,
                                 PaymentDate = pay.PaymentDate.ToString("yyyy-MM-dd HH:mm:ss"),
                                 PaymentMethod = pm.PaymentMethodName,
                                 PaymentStatus = sts.Status
@@ -126,8 +128,8 @@ namespace PaymentsAPI.Service
 
                 newPayment = new Payment
                 {
-                    AccountId = payorAccount.Id,
-                    CustomerId = payorCustomerId,
+                    PayorAccountId = payorAccount.Id,
+                    PayorCustomerId = payorCustomerId,
                     PaymentMethodId = paymentMethodId,
                     PaymentStatusId = statusId,
                     PaymentAmount = payment.Amount,

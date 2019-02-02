@@ -6,8 +6,10 @@ namespace PaymentsAPI.DataModel.Entities
     public partial class Payment
     {
         public Guid Id { get; set; }
-        public long AccountId { get; set; }
-        public long CustomerId { get; set; }
+        public long PayorAccountId { get; set; }
+        public long PayorCustomerId { get; set; }
+        public long PayeeAccountId { get; set; }
+        public long PayeeCustomerId { get; set; }
         public long PaymentMethodId { get; set; }
         public long PaymentStatusId { get; set; }
         public string TransactionId { get; set; }

@@ -116,15 +116,27 @@ namespace PaymentsAPI.DataModel
 
                 entity.HasOne(d => d.Account)
                     .WithMany(p => p.Payment)
-                    .HasForeignKey(d => d.AccountId)
+                    .HasForeignKey(d => d.PayorAccountId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Payment_Account");
+                    .HasConstraintName("FK_Payment_PayorAccount");
 
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.Payment)
-                    .HasForeignKey(d => d.CustomerId)
+                    .HasForeignKey(d => d.PayorCustomerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Payment_Customer");
+                    .HasConstraintName("FK_Payment_PayorCustomer");
+
+                entity.HasOne(d => d.Account)
+                    .WithMany(p => p.Payment)
+                    .HasForeignKey(d => d.PayeeAccountId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Payment_PayeeAccount");
+
+                entity.HasOne(d => d.Customer)
+                    .WithMany(p => p.Payment)
+                    .HasForeignKey(d => d.PayeeCustomerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Payment_PayeeCustomer");
 
                 entity.HasOne(d => d.PaymentMethod)
                     .WithMany(p => p.Payment)
