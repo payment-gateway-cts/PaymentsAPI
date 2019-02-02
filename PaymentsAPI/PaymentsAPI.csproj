@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <DockerTargetOS>Linux</DockerTargetOS>
     <UserSecretsId>e765e2c1-b667-4ef4-8de0-8ddb964ce602</UserSecretsId>
+    <ApplicationInsightsResourceId>/subscriptions/e64153fa-5559-4127-86f3-9dfc87dd8c2b/resourcegroups/PaymentAppResourceGroup/providers/microsoft.insights/components/PaymentAppInsights</ApplicationInsightsResourceId>
+    <ApplicationInsightsAnnotationResourceId>/subscriptions/e64153fa-5559-4127-86f3-9dfc87dd8c2b/resourcegroups/PaymentAppResourceGroup/providers/microsoft.insights/components/PaymentAppInsights</ApplicationInsightsAnnotationResourceId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.4" />
@@ -27,6 +30,10 @@
     <ProjectReference Include="..\PaymentsAPI.BusinessModels\PaymentsAPI.BusinessModels.csproj" />
     <ProjectReference Include="..\PaymentsAPI.Interfaces\PaymentsAPI.Interfaces.csproj" />
     <ProjectReference Include="..\PaymentsService\PaymentsAPI.Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services" />
   </ItemGroup>
 
 </Project>
