@@ -63,7 +63,7 @@ namespace PaymentsAPI
             }
             else
             {
-                app.UseExceptionHandler();
+                app.UseExceptionHandler("/Error");
                 //app.UseHsts();    //Commenting temp during dev for use on docker container
             }
 
