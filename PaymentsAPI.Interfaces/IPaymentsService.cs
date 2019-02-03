@@ -10,8 +10,9 @@ namespace PaymentsAPI.Interfaces
         /*IEnumerable<Payment> GetAllPaymentsList();
         Payment MakePayment(Payment newPayment);
         Payment GetPaymentById(int transactionId);
-        int PurgePayments();
-        IEnumerable<Account> GetAccounts();*/
+        int PurgePayments();*/
+
+        IEnumerable<AccountBM> GetAccounts();
 
         IEnumerable<PaymentBM> GetPayments();
 

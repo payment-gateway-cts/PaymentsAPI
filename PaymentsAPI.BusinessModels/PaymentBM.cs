@@ -13,7 +13,8 @@ namespace PaymentsAPI.BusinessModels
         public string PayorAccountNumber { get; set; }
         public string PayorCurrency { get; set; }
 
-        public string CustomerName { get; set; }
+        public string PayeeName { get; set; }
+        public string PayorName { get; set; }
         public string PaymentMethod { get; set; }
         public string TransactionId { get; set; }
         public string TransactionType { get; set; }

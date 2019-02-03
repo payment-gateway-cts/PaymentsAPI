@@ -22,47 +22,21 @@ namespace PaymentsAPI.Service
             _cache = cache;
         }
 
-        /* ToDo: Implementation pending for below method
-        public IEnumerable<Account> GetAccounts()
+        public IEnumerable<AccountBM> GetAccounts()
         {
-            var accs = new List<Account>
+            //ToDo: Use Automapper for entity to Business Model conversion
+            return _context.Account.Select(accNtt => new AccountBM
             {
-                new Account
-                {
-                    AccountType = "Savings",
-                    BIC = "AAAAAAAAAAA",
-                    Currency = "EUR",
-                    IBAN = "CH99 1111 2222 3333 4444",
-                    Id = Guid.NewGuid().ToString(),
-                    Name = "My Savings Account",
-                    Product = "Bonviva Platinum Savings"
-                },
-
-                new Account
-                {
-                    AccountType = "Savings",
-                    BIC = "BBBBBBBBBBB",
-                    Currency = "EUR",
-                    IBAN = "CH99 5555 6666 7777 8888",
-                    Id = Guid.NewGuid().ToString(),
-                    Name = "Project Savings Account",
-                    Product = "Bonviva Golden Savings"
-                },
-
-                new Account
-                {
-                    AccountType = "Savings",
-                    BIC = "CCCCCCCCCC",
-                    Currency = "CHF",
-                    IBAN = "CH99 9999 8888 7777 6666",
-                    Id = Guid.NewGuid().ToString(),
-                    Name = "My First Savings Account",
-                    Product = "Bonviva Silver Savings"
-                }
-            };
-
-            return accs;
-        }*/
+                Id = accNtt.Id,
+                AccountNumber = accNtt.AccountNumber,
+                AccountType = accNtt.AccountType.AccountType1,
+                Name = accNtt.AccountName,
+                CustomerName = accNtt.Customer.LastName + ", " + accNtt.Customer.FirstName,
+                Currency = accNtt.Currency,
+                IBAN = accNtt.Iban,
+                CurrentBalance = accNtt.CurrentBalance
+            });
+        }
 
         public IEnumerable<PaymentBM> GetPayments()
         {
@@ -75,13 +49,15 @@ namespace PaymentsAPI.Service
                             join sts in _context.PaymentStatus on pay.PaymentStatusId equals sts.Id
                             select new PaymentBM
                             {
-                                CustomerName = $" {payeecus.LastName}, {payeecus.FirstName}",
+                                PayeeName = $" {payeecus.LastName}, {payeecus.FirstName}",
+                                PayorName = $" {payorcus.LastName}, {payorcus.FirstName}",
                                 PayorAccountNumber = payoracc.AccountNumber,
                                 PayeeAccountNumber = payeeacc.AccountNumber,
                                 TransactionId = pay.TransactionId,
                                 TransactionType = pay.TransactionType,
                                 Amount = pay.PaymentAmount,
                                 PayorCurrency = payoracc.Currency,
+                                PayeeCurrency = payeeacc.Currency,
                                 PaymentDate = pay.PaymentDate.ToString("yyyy-MM-dd HH:mm:ss"),
                                 PaymentMethod = pm.PaymentMethodName,
                                 PaymentStatus = sts.Status
@@ -104,14 +80,11 @@ namespace PaymentsAPI.Service
 
             if (payorAccount != null && payeeAccount != null)
             {
-
-                var payorCustomerId = _context.Customer.Where(x => x.Account.Any(y => y.Id == payorAccount.Id)).Select(x => x.Id).FirstOrDefault();
-
-                var paymentMethodId = _context.PaymentMethod.Where(x => x.PaymentMethodName == payment.PaymentMethod).Select(x => x.Id).FirstOrDefault();
+                var paymentMethodId = _context.PaymentMethod.Where(x => x.PaymentMethodCode == payment.PaymentMethod).Select(x => x.Id).FirstOrDefault();
                 var statusId = _context.PaymentStatus.Where(x => x.Status == PaymentSatus.Completed.ToString()).Select(x => x.Id).FirstOrDefault();
 
+                //ToDo: Below needs to be reviewed and removed if not needed
                 transactionId = PaymentHelper.GenerateTransactionId();
-
                 if (_context.Payment.Any(x => x.TransactionId == transactionId))
                 {
                     transactionId = PaymentHelper.GenerateTransactionId();
@@ -129,7 +102,9 @@ namespace PaymentsAPI.Service
                 newPayment = new Payment
                 {
                     PayorAccountId = payorAccount.Id,
-                    PayorCustomerId = payorCustomerId,
+                    PayorCustomerId = payorAccount.CustomerId.Value,
+                    PayeeAccountId = payeeAccount.Id,
+                    PayeeCustomerId = payeeAccount.CustomerId.Value,
                     PaymentMethodId = paymentMethodId,
                     PaymentStatusId = statusId,
                     PaymentAmount = payment.Amount,

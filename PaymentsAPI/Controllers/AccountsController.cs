@@ -20,10 +20,9 @@ namespace PaymentsAPI.Controllers
 
         // GET api/accounts
         [HttpGet]
-        public JsonResult Get()
+        public IActionResult Get()
         {
-            //return new JsonResult(_paymentService.GetAccounts());
-            return new JsonResult("To Do");
+            return Ok(_paymentService.GetAccounts());
         }
 
         // GET api/accounts/5
