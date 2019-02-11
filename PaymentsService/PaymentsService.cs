@@ -22,6 +22,18 @@ namespace PaymentsAPI.Service
             _cache = cache;
         }
 
+        public IEnumerable<CustomerBM> GetCustomers()
+        {
+            //ToDo: Use Automapper for entity to Business Model conversion
+            return _context.Customer.Select(custNtt => new CustomerBM
+            {
+                Id = custNtt.Id,
+                FirstName = custNtt.FirstName,
+                LastName = custNtt.LastName,
+                Address = custNtt.Address
+            });
+        }
+
         public IEnumerable<AccountBM> GetAccounts()
         {
             //ToDo: Use Automapper for entity to Business Model conversion
@@ -35,6 +47,27 @@ namespace PaymentsAPI.Service
                 Currency = accNtt.Currency,
                 IBAN = accNtt.Iban,
                 CurrentBalance = accNtt.CurrentBalance
+            });
+        }
+
+        public IEnumerable<PaymentMethodBM> GetPaymentMethods()
+        {
+            //ToDo: Use Automapper for entity to Business Model conversion
+            return _context.PaymentMethod.Select(payMethodNtt => new PaymentMethodBM
+            {
+                Id = payMethodNtt.Id,
+                PaymentMethodName = payMethodNtt.PaymentMethodName,
+                PaymentMethodCode = payMethodNtt.PaymentMethodCode
+            });
+        }
+
+        public IEnumerable<AccountTypeBM> GetAccountTypes()
+        {
+            //ToDo: Use Automapper for entity to Business Model conversion
+            return _context.AccountType.Select(accTypeNtt => new AccountTypeBM
+            {
+                Id = accTypeNtt.Id,
+                AccountTypeName = accTypeNtt.AccountType1
             });
         }
 
@@ -126,7 +159,7 @@ namespace PaymentsAPI.Service
             return _context.Account.Where(x => x.AccountNumber == accountNumber).Select(x => x.Currency).FirstOrDefault();
         }
 
-        public decimal GetCurrencyExchangeRates(string fromCurrency, string toCurrency)
+        public decimal GetCurrencyExchangeRate(string fromCurrency, string toCurrency)
         {
             try
             {

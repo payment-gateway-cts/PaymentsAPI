@@ -11,8 +11,13 @@ namespace PaymentsAPI.Interfaces
         Payment MakePayment(Payment newPayment);
         Payment GetPaymentById(int transactionId);
         int PurgePayments();*/
+        IEnumerable<CustomerBM> GetCustomers();
+
+        IEnumerable<AccountTypeBM> GetAccountTypes();
 
         IEnumerable<AccountBM> GetAccounts();
+
+        IEnumerable<PaymentMethodBM> GetPaymentMethods();
 
         IEnumerable<PaymentBM> GetPayments();
 
@@ -20,7 +25,7 @@ namespace PaymentsAPI.Interfaces
 
         string GetCurrency(string accountNumber);
 
-        decimal GetCurrencyExchangeRates(string fromCurrency, string toCurrency);
+        decimal GetCurrencyExchangeRate(string fromCurrency, string toCurrency);
 
     }
 }

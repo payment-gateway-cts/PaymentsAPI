@@ -55,7 +55,7 @@ namespace PaymentsAPI.Controllers
                 if (string.IsNullOrEmpty(value.PayeeCurrency)) value.PayeeCurrency = PaymentEnums.Currency.GBP.ToString();
                 if (string.IsNullOrEmpty(value.PayorCurrency)) value.PayorCurrency = PaymentEnums.Currency.INR.ToString();
 
-                value.Amount = value.Amount * _paymentService.GetCurrencyExchangeRates(value.PayorCurrency, value.PayeeCurrency);
+                value.Amount = value.Amount * _paymentService.GetCurrencyExchangeRate(value.PayorCurrency, value.PayeeCurrency);
                 value.PaymentDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
                 if (string.IsNullOrEmpty(value.PaymentMethod)) value.PaymentMethod = PaymentEnums.PaymentMethod.InternateBanking.ToString();
