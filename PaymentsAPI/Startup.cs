@@ -78,6 +78,7 @@ namespace PaymentsAPI
             });
 
             //app.UseHttpsRedirection();  //Commenting temp during dev for use on docker container
+            app.UseStaticFiles();
             app.UseStatusCodePages();
             app.UseMvc();
         }
