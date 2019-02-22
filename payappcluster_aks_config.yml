@@ -1,0 +1,20 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: REDACTED
+    server: https://payapp-850facb5.hcp.eastus.azmk8s.io:443
+  name: payappcluster
+contexts:
+- context:
+    cluster: payappcluster
+    user: clusterUser_PaymentAppResourceGroup_payappcluster
+  name: payappcluster
+current-context: payappcluster
+kind: Config
+preferences: {}
+users:
+- name: clusterUser_PaymentAppResourceGroup_payappcluster
+  user:
+    client-certificate-data: REDACTED
+    client-key-data: REDACTED
+    token: 54eb3fe7c7259e6f5f568652d47dfdbd
