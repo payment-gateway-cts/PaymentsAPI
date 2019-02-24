@@ -9,10 +9,10 @@ COPY ["PaymentsAPI/PaymentsAPI.csproj", "PaymentsAPI/"]
 RUN dotnet restore "PaymentsAPI/PaymentsAPI.csproj"
 COPY . .
 WORKDIR "/src/PaymentsAPI"
-RUN dotnet build "PaymentsAPI.csproj" -c Release -o /app
+RUN dotnet build "PaymentsAPI.csproj" -c Development -o /app
 
 FROM build AS publish
-RUN dotnet publish "PaymentsAPI.csproj" -c Release -o /app
+RUN dotnet publish "PaymentsAPI.csproj" -c Development -o /app
 
 FROM base AS final
 WORKDIR /app
