@@ -20,7 +20,9 @@ namespace PaymentsAPI
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((hostingContext, config)=> {
-                    config.AddEnvironmentVariables();
+                    config
+                    .AddJsonFile("secrets/appSettings.Staging.json", true)
+                    .AddEnvironmentVariables();
                 })
                 .UseApplicationInsights()
                 .UseStartup<Startup>();
